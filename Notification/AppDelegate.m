@@ -16,7 +16,6 @@
 
 @implementation AppDelegate
 
-
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
@@ -24,6 +23,8 @@
     [self addObserver:self block:^(Notification * _Nonnull notification) {
         NSLog(@"--------------");
     } name:@"Test" object:nil];
+    
+    [self addObserver:self selector:@selector(updateName:telphone:) name:@"PersonInfo" object:nil];
     
     ViewController *viewController = [[ViewController alloc] init];
     self.window.rootViewController = viewController;
@@ -57,6 +58,11 @@
 
 - (void)applicationWillTerminate:(UIApplication *)application {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+}
+
+- (void)updateName:(NSString *)name telphone:(NSString *)telphone
+{
+    NSLog(@"name:%@, telphone:%@", name, telphone);
 }
 
 @end
