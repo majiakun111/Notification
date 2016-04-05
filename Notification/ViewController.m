@@ -7,7 +7,7 @@
 //
 
 #import "ViewController.h"
-#import "NotificationCenter.h"
+#import "NSObject+Notification.h"
 
 @interface ViewController ()
 
@@ -23,7 +23,7 @@
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        [[NotificationCenter defaultCenter] postNotificationName:@"Test" object:nil userInfo:@{@"name" : @"Ansel"}];
+        [self postNotificationName:@"Test" object:nil userInfo:@{@"name" : @"Ansel"}];
     });
 }
 

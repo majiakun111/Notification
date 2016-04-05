@@ -8,7 +8,7 @@
 
 #import "AppDelegate.h"
 #import "ViewController.h"
-#import "NotificationCenter.h"
+#import "NSObject+Notification.h"
 
 @interface AppDelegate ()
 
@@ -21,8 +21,8 @@
     // Override point for customization after application launch.
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     
-    [[NotificationCenter defaultCenter] addObserver:self block:^(Notification * _Nonnull notification) {
-        NSLog(@"---------");
+    [self addObserver:self block:^(Notification * _Nonnull notification) {
+        NSLog(@"--------------");
     } name:@"Test" object:nil];
     
     ViewController *viewController = [[ViewController alloc] init];
@@ -41,7 +41,7 @@
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
-    [[NotificationCenter defaultCenter] removeObserver:self];
+    [self removeObserver:self];
     
     // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
     // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.

@@ -12,8 +12,9 @@
 		5B1DD34C1CB3535300C61BED /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B1DD34B1CB3535300C61BED /* ViewController.m */; };
 		5B1DD3511CB3535300C61BED /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5B1DD3501CB3535300C61BED /* Assets.xcassets */; };
 		5B1DD3541CB3535300C61BED /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5B1DD3521CB3535300C61BED /* LaunchScreen.storyboard */; };
-		5B1DD35D1CB353D700C61BED /* Notification.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B1DD35C1CB353D700C61BED /* Notification.m */; };
-		5B1DD3601CB353F100C61BED /* NotificationCenter.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B1DD35F1CB353F100C61BED /* NotificationCenter.m */; };
+		5B1DD36B1CB3770700C61BED /* Notification.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B1DD3661CB3770700C61BED /* Notification.m */; };
+		5B1DD36C1CB3770700C61BED /* NotificationCenter.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B1DD3681CB3770700C61BED /* NotificationCenter.m */; };
+		5B1DD36D1CB3770700C61BED /* NSObject+Notification.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B1DD36A1CB3770700C61BED /* NSObject+Notification.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,10 +27,12 @@
 		5B1DD3501CB3535300C61BED /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5B1DD3531CB3535300C61BED /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		5B1DD3551CB3535300C61BED /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		5B1DD35B1CB353D700C61BED /* Notification.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Notification.h; sourceTree = "<group>"; };
-		5B1DD35C1CB353D700C61BED /* Notification.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Notification.m; sourceTree = "<group>"; };
-		5B1DD35E1CB353F100C61BED /* NotificationCenter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotificationCenter.h; sourceTree = "<group>"; };
-		5B1DD35F1CB353F100C61BED /* NotificationCenter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NotificationCenter.m; sourceTree = "<group>"; };
+		5B1DD3651CB3770700C61BED /* Notification.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Notification.h; sourceTree = "<group>"; };
+		5B1DD3661CB3770700C61BED /* Notification.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Notification.m; sourceTree = "<group>"; };
+		5B1DD3671CB3770700C61BED /* NotificationCenter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotificationCenter.h; sourceTree = "<group>"; };
+		5B1DD3681CB3770700C61BED /* NotificationCenter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NotificationCenter.m; sourceTree = "<group>"; };
+		5B1DD3691CB3770700C61BED /* NSObject+Notification.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+Notification.h"; sourceTree = "<group>"; };
+		5B1DD36A1CB3770700C61BED /* NSObject+Notification.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+Notification.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,14 +65,11 @@
 		5B1DD3431CB3535300C61BED /* Notification */ = {
 			isa = PBXGroup;
 			children = (
+				5B1DD3641CB3770700C61BED /* Notification */,
 				5B1DD3471CB3535300C61BED /* AppDelegate.h */,
 				5B1DD3481CB3535300C61BED /* AppDelegate.m */,
 				5B1DD34A1CB3535300C61BED /* ViewController.h */,
 				5B1DD34B1CB3535300C61BED /* ViewController.m */,
-				5B1DD35B1CB353D700C61BED /* Notification.h */,
-				5B1DD35C1CB353D700C61BED /* Notification.m */,
-				5B1DD35E1CB353F100C61BED /* NotificationCenter.h */,
-				5B1DD35F1CB353F100C61BED /* NotificationCenter.m */,
 				5B1DD3501CB3535300C61BED /* Assets.xcassets */,
 				5B1DD3521CB3535300C61BED /* LaunchScreen.storyboard */,
 				5B1DD3551CB3535300C61BED /* Info.plist */,
@@ -84,6 +84,19 @@
 				5B1DD3451CB3535300C61BED /* main.m */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		5B1DD3641CB3770700C61BED /* Notification */ = {
+			isa = PBXGroup;
+			children = (
+				5B1DD3651CB3770700C61BED /* Notification.h */,
+				5B1DD3661CB3770700C61BED /* Notification.m */,
+				5B1DD3671CB3770700C61BED /* NotificationCenter.h */,
+				5B1DD3681CB3770700C61BED /* NotificationCenter.m */,
+				5B1DD3691CB3770700C61BED /* NSObject+Notification.h */,
+				5B1DD36A1CB3770700C61BED /* NSObject+Notification.m */,
+			);
+			path = Notification;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -155,10 +168,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5B1DD35D1CB353D700C61BED /* Notification.m in Sources */,
-				5B1DD3601CB353F100C61BED /* NotificationCenter.m in Sources */,
+				5B1DD36B1CB3770700C61BED /* Notification.m in Sources */,
+				5B1DD36C1CB3770700C61BED /* NotificationCenter.m in Sources */,
 				5B1DD34C1CB3535300C61BED /* ViewController.m in Sources */,
 				5B1DD3491CB3535300C61BED /* AppDelegate.m in Sources */,
+				5B1DD36D1CB3770700C61BED /* NSObject+Notification.m in Sources */,
 				5B1DD3461CB3535300C61BED /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -302,6 +316,7 @@
 				5B1DD35A1CB3535300C61BED /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
