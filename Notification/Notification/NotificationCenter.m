@@ -93,6 +93,21 @@
     }
 }
 
+- (void)addObserver:(nonnull id)observer selector:(nonnull SEL)selector name:(nullable NSString *)name object:(nullable id)object
+{
+    NSParameterAssert(observer && name && selector);
+    
+    if ([NSThread isMainThread]) {
+        NotificationObserverRecord *notificationObserverRecord = [[NotificationObserverRecord alloc] initWithObject:object observer:observer selector:selector];
+        [self _addNotificationObserverRecord:notificationObserverRecord name:name];
+    } else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NotificationObserverRecord *notificationObserverRecord = [[NotificationObserverRecord alloc] initWithObject:object observer:observer selector:selector];
+            [self _addNotificationObserverRecord:notificationObserverRecord name:name];
+        });
+    }
+}
+
 - (void)postNotification:(nonnull Notification *)notification
 {
     if ([NSThread isMainThread]) {
@@ -117,46 +132,33 @@
     [self postNotification:notification];
 }
 
-- (void)addObserver:(nonnull id)observer selector:(nonnull SEL)selector name:(nullable NSString *)name object:(nullable id)object
-{
-    NSParameterAssert(observer && name && selector);
-    
-    if ([NSThread isMainThread]) {
-        NotificationObserverRecord *notificationObserverRecord = [[NotificationObserverRecord alloc] initWithObject:object observer:observer selector:selector];
-        [self _addNotificationObserverRecord:notificationObserverRecord name:name];
-    } else {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NotificationObserverRecord *notificationObserverRecord = [[NotificationObserverRecord alloc] initWithObject:object observer:observer selector:selector];
-            [self _addNotificationObserverRecord:notificationObserverRecord name:name];
-        });
-    }
-}
-
 - (void)postNotificationName:(nonnull NSString *)name object:(nullable id)object firstArgument:(nullable id)firstArgument,...
 {
-    __block struct {
-        va_list behindArgumentList;
-    }argumentListStruct;
-    
-    if (firstArgument) {// The first argument isn't part of the varargs list, so we'll handle it separately.
-        va_start(argumentListStruct.behindArgumentList, firstArgument);// Start scanning for arguments after firstObject.
-    }
-    
-    [self postNotificationName:name object:object firstArgument:firstArgument behindArgumentList:argumentListStruct.behindArgumentList];
-    
+    NSMutableArray* argumentList = [NSMutableArray array];
+    va_list arguments;
     if (firstArgument) {
-        va_end(argumentListStruct.behindArgumentList);
+        [argumentList addObject:firstArgument];
+        
+        va_start(arguments, firstArgument);
+        id arg;
+        while ((arg = va_arg(arguments, id))) {
+            [argumentList addObject:arg];
+        }
+        
+        va_end(arguments);
     }
+    
+    [self postNotificationName:name object:object argumentList:(NSArray *)argumentList];
 }
 
-- (void)postNotificationName:(nonnull NSString *)name object:(nullable id)object firstArgument:(nullable id)firstArgument behindArgumentList:(va_list)behindArgumentList
+- (void)postNotificationName:(nonnull NSString *)name object:(nullable id)object argumentList:(nullable NSArray *)argumentList
 {
     if ([NSThread isMainThread]) {
-        [self _postNotificationName:name object:object firstArgument:firstArgument behindArgumentList:behindArgumentList];
+        [self _postNotificationName:name object:object argumentList:argumentList];
     }
     else {
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self _postNotificationName:name object:object firstArgument:firstArgument behindArgumentList:behindArgumentList];
+            [self _postNotificationName:name object:object argumentList:argumentList];
         });
     }
 }
@@ -234,7 +236,7 @@
     }
 }
 
-- (void)_postNotificationName:(nonnull NSString *)name object:(nullable id)object firstArgument:(id)firstArgument behindArgumentList:(va_list)behindArgumentList
+- (void)_postNotificationName:(nonnull NSString *)name object:(nullable id)object argumentList:(NSArray *)argumentList
 {
     NSMutableArray *notificationObserverRecords = [self.notificationObserverRecordMap objectForKey:name];
     
@@ -251,11 +253,9 @@
         [invocation setSelector:notificationObserverRecord.selector];
         [invocation setTarget:notificationObserverRecord.observer];
         
-        if (firstArgument) {
-            [invocation setArgument:&firstArgument atIndex:2];
-            [self bindArgumentList:behindArgumentList forInvocation:invocation];
+        if (argumentList) {
+            [self bindArgumentList:argumentList forInvocation:invocation];
         }
-        
         
         [invocation invoke];
     }
@@ -318,99 +318,12 @@
     }
 }
 
-- (BOOL)bindArgumentList:(va_list)argumentList forInvocation:(NSInvocation*)invocation
+- (void)bindArgumentList:(NSArray *)argumentList forInvocation:(NSInvocation*)invocation
 {
-    BOOL result = YES;
-    
-    for (unsigned int index = 3; index < invocation.methodSignature.numberOfArguments; index++) {
-        const char* argumentType = [invocation.methodSignature getArgumentTypeAtIndex:index];
-        
-        switch (argumentType[0]) {
-            case 's':
-            case 'S':
-            case 'c':
-            case 'C':
-            case 'i':
-            case 'I':
-            case 'B': {
-                int argument = va_arg(argumentList, int);
-                [invocation setArgument:&argument atIndex:index];
-                break;
-            }
-            case 'l':
-            case 'L': {
-                long argument = va_arg(argumentList, long);
-                [invocation setArgument:&argument atIndex:index];
-                break;
-            }
-            case 'q':
-            case 'Q': {
-                long long argument = va_arg(argumentList, long long);
-                [invocation setArgument:&argument atIndex:index];
-                break;
-            }
-            case 'f': {
-                float argument = va_arg(argumentList, double);
-                [invocation setArgument:&argument atIndex:index];
-                break;
-            }
-            case 'd': {
-                double argument = va_arg(argumentList, double);
-                [invocation setArgument:&argument atIndex:index];
-                break;
-            }
-            case '@': {
-                id argument = va_arg(argumentList, id);
-                [invocation setArgument:&argument atIndex:index];
-                
-                break;
-            }
-            case '^':
-            case '*':
-            case '#':
-            case ':':
-            case '[': {
-                int* argument = va_arg(argumentList, int*);
-                [invocation setArgument:&argument atIndex:index];
-                break;
-            }
-            case '{': {
-                if (strcmp(argumentType, @encode(CGPoint)) == 0) {
-                    CGPoint argument = va_arg(argumentList, CGPoint);
-                    [invocation setArgument:&argument atIndex:index];
-                }
-                else if (strcmp(argumentType, @encode(CGRect)) == 0) {
-                    CGRect argument = va_arg(argumentList, CGRect);
-                    [invocation setArgument:&argument atIndex:index];
-                }
-                else if (strcmp(argumentType, @encode(CGSize)) == 0) {
-                    CGSize argument = va_arg(argumentList, CGSize);
-                    [invocation setArgument:&argument atIndex:index];
-                }
-                else {
-#ifdef _DEBUG
-                    NSLog(@"####:Can't handle argument type (%s)", argumentType);
-                    NSLog(@"####:If neccesary, you can add support of this struct type in NotificationCenter");
-                    
-                    assert(0);
-#endif
-                    result = NO;
-                }
-                break;
-            }
-            default: {
-#ifdef _DEBUG
-                NSLog(@"####:Can't handle argument type (%s)", argumentType);
-                
-                assert(0);
-#endif
-                result = NO;
-                break;
-            }
-        }
+    for (unsigned int index = 2; index < invocation.methodSignature.numberOfArguments; index++) {
+        id argument = argumentList[index-2];
+        [invocation setArgument:&argument atIndex:index];
     }
-    
-    return result;
 }
 
 @end
