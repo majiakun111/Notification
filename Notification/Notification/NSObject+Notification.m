@@ -37,16 +37,21 @@
 
 - (void)postNotificationName:(nonnull NSString *)name object:(nullable id)object firstArgument:(nullable id)firstArgument,...
 {
-    va_list behindArgumentList;
+    NSMutableArray* argumentList = [NSMutableArray array];
+    va_list arguments;
     if (firstArgument) {
-        va_start(behindArgumentList, firstArgument);
+        [argumentList addObject:firstArgument];
+        
+        va_start(arguments, firstArgument);
+        id arg;
+        while ((arg = va_arg(arguments, id))) {
+            [argumentList addObject:arg];
+        }
+        
+        va_end(arguments);
     }
     
-    [[NotificationCenter defaultCenter] postNotificationName:name object:object firstArgument:firstArgument behindArgumentList:behindArgumentList];
-    
-    if (firstArgument) {
-        va_end(behindArgumentList);
-    }
+    [[NotificationCenter defaultCenter] postNotificationName:name object:object argumentList:(NSArray *)argumentList];
 }
 
 - (void)removeObserver:(nonnull id)observer
