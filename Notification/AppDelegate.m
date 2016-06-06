@@ -21,7 +21,7 @@
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     
     [self addObserver:self block:^(Notification * _Nonnull notification) {
-        NSLog(@"-------123-------");
+        NSLog(@"--------------");
     } name:@"Test" object:nil];
     
     [self addObserver:self selector:@selector(updateName:telphone:) name:@"PersonInfo" object:nil];
