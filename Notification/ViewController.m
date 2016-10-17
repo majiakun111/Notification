@@ -27,7 +27,7 @@
     });
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        [self postNotificationName:@"PersonInfo" object:nil firstArgument:@"Ansel", @"13809891621", nil];
+        [self postNotificationName:@"PersonInfo" object:nil firstArgument:@"SZ", @"13809891621", nil];
     });
 }
 

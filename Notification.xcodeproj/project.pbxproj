@@ -15,6 +15,7 @@
 		5B1DD36B1CB3770700C61BED /* Notification.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B1DD3661CB3770700C61BED /* Notification.m */; };
 		5B1DD36C1CB3770700C61BED /* NotificationCenter.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B1DD3681CB3770700C61BED /* NotificationCenter.m */; };
 		5B1DD36D1CB3770700C61BED /* NSObject+Notification.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B1DD36A1CB3770700C61BED /* NSObject+Notification.m */; };
+		5B8132C41DB4ED060091E548 /* BlockDescription.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B8132C31DB4ED060091E548 /* BlockDescription.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +34,8 @@
 		5B1DD3681CB3770700C61BED /* NotificationCenter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NotificationCenter.m; sourceTree = "<group>"; };
 		5B1DD3691CB3770700C61BED /* NSObject+Notification.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+Notification.h"; sourceTree = "<group>"; };
 		5B1DD36A1CB3770700C61BED /* NSObject+Notification.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+Notification.m"; sourceTree = "<group>"; };
+		5B8132C21DB4ED060091E548 /* BlockDescription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BlockDescription.h; sourceTree = "<group>"; };
+		5B8132C31DB4ED060091E548 /* BlockDescription.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BlockDescription.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,6 +98,8 @@
 				5B1DD3681CB3770700C61BED /* NotificationCenter.m */,
 				5B1DD3691CB3770700C61BED /* NSObject+Notification.h */,
 				5B1DD36A1CB3770700C61BED /* NSObject+Notification.m */,
+				5B8132C21DB4ED060091E548 /* BlockDescription.h */,
+				5B8132C31DB4ED060091E548 /* BlockDescription.m */,
 			);
 			path = Notification;
 			sourceTree = "<group>";
@@ -168,6 +173,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5B8132C41DB4ED060091E548 /* BlockDescription.m in Sources */,
 				5B1DD36B1CB3770700C61BED /* Notification.m in Sources */,
 				5B1DD36C1CB3770700C61BED /* NotificationCenter.m in Sources */,
 				5B1DD34C1CB3535300C61BED /* ViewController.m in Sources */,

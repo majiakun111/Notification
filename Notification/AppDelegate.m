@@ -24,7 +24,10 @@
         NSLog(@"-------123-----test1--");
     } name:@"Test" object:nil];
     
-    [self addObserver:self selector:@selector(updateName:telphone:) name:@"PersonInfo" object:nil];
+    [self addObserver:self selector:@selector(updateWithNotification:address:telphone:) name:@"PersonInfo" object:nil];
+    [self addObserver:self block:^(Notification * _Nonnull notification, NSString * _Nonnull address, NSString *telphone) {
+        NSLog(@"block address:%@, telphone:%@", address, telphone);
+    } name:@"PersonInfo" object:nil];
     
     ViewController *viewController = [[ViewController alloc] init];
     self.window.rootViewController = viewController;
@@ -60,9 +63,9 @@
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 }
 
-- (void)updateName:(NSString *)name telphone:(NSString *)telphone
+- (void)updateWithNotification:(NSNotification *)notification address:(NSString *)address telphone:(NSString *)telphone
 {
-    NSLog(@"name:%@, telphone:%@", name, telphone);
+    NSLog(@"SEL address:%@, telphone:%@", address, telphone);
 }
 
 @end

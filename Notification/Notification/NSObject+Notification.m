@@ -10,7 +10,7 @@
 
 @implementation NSObject (Notification)
 
-- (void)addObserver:(nonnull id)observer block:(nonnull NotificationBlock)block name:(nullable NSString *)name object:(nullable id)object
+- (void)addObserver:(nonnull id)observer block:(nullable id)block name:(nullable NSString *)name object:(nullable id)object
 {
     [[NotificationCenter defaultCenter] addObserver:observer block:block name:name object:object];
 }

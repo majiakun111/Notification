@@ -12,7 +12,7 @@
 
 @interface NSObject (Notification)
 
-- (void)addObserver:(nonnull id)observer block:(nonnull NotificationBlock)block name:(nullable NSString *)name object:(nullable id)object;
+- (void)addObserver:(nonnull id)observer block:(nullable id)block name:(nullable NSString *)name object:(nullable id)object;
 - (void)addObserver:(nonnull id)observer selector:(nonnull SEL)selector name:(nullable NSString *)name object:(nullable id)object;
 
 - (void)postNotification:(nonnull Notification *)notification;

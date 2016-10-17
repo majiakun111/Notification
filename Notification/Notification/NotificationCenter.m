@@ -8,15 +8,17 @@
 
 #import "NotificationCenter.h"
 #import "Notification.h"
+#import "BlockDescription.h"
 
 @interface NotificationObserverRecord : NSObject
 
 @property (nonatomic, weak) id object;
 @property (nonatomic, weak) id observer;
 @property (nonatomic, assign) SEL selector;
-@property (nonatomic, copy) NotificationBlock block;
 
-- (instancetype)initWithObject:(id)object observer:(id)observer block:(nonnull NotificationBlock)block;
+@property (nonatomic, strong) BlockDescription *blockDescription;
+
+- (instancetype)initWithObject:(id)object observer:(id)observer block:(id)block;
 
 - (instancetype)initWithObject:(id)object observer:(id)observer selector:(SEL)selector;
 
@@ -24,13 +26,16 @@
 
 @implementation NotificationObserverRecord
 
-- (instancetype)initWithObject:(id)object observer:(id)observer block:(nonnull NotificationBlock)block
+- (instancetype)initWithObject:(id)object observer:(id)observer block:(nullable id)block
 {
     self = [super init];
     if (self) {
         _object = object;
         _observer = observer;
-        _block = [block copy];
+        
+        if (block) {
+            _blockDescription = [[BlockDescription alloc] initWithBlock:block];
+        }
     }
     
     return self;
@@ -50,7 +55,7 @@
 
 - (void)dealloc
 {
-    self.block = nil;
+    self.blockDescription = nil;
 }
 
 @end
@@ -77,7 +82,7 @@
     return instance;
 }
 
-- (void)addObserver:(nonnull id)observer block:(nonnull NotificationBlock)block name:(nullable NSString *)name object:(nullable id)object
+- (void)addObserver:(nonnull id)observer block:(nullable id)block name:(nullable NSString *)name object:(nullable id)object
 {
     NSParameterAssert(observer && name && block);
     
@@ -110,26 +115,17 @@
 
 - (void)postNotification:(nonnull Notification *)notification
 {
-    if ([NSThread isMainThread]) {
-        [self _postNotification:notification];
-    }
-    else {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self _postNotification:notification];
-        });
-    }
+    [self postNotification:notification argumentList:nil];
 }
 
 - (void)postNotificationName:(nonnull NSString *)name object:(nullable id)object
 {
-    Notification *notification = [[Notification alloc] initWithName:name object:object userInfo:nil];
-    [self postNotification:notification];
+    [self postNotificationName:name object:object userInfo:nil];
 }
 
 - (void)postNotificationName:(nonnull NSString *)name object:(nullable id)object userInfo:(nullable NSDictionary *)userInfo
 {
-    Notification *notification = [[Notification alloc] initWithName:name object:object userInfo:userInfo];
-    [self postNotification:notification];
+    [self postNotificationName:name object:object userInfo:userInfo argumentList:nil];
 }
 
 - (void)postNotificationName:(nonnull NSString *)name object:(nullable id)object firstArgument:(nullable id)firstArgument,...
@@ -153,14 +149,7 @@
 
 - (void)postNotificationName:(nonnull NSString *)name object:(nullable id)object argumentList:(nullable NSArray *)argumentList
 {
-    if ([NSThread isMainThread]) {
-        [self _postNotificationName:name object:object argumentList:argumentList];
-    }
-    else {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self _postNotificationName:name object:object argumentList:argumentList];
-        });
-    }
+    [self postNotificationName:name object:object userInfo:nil argumentList:argumentList];
 }
 
 - (void)removeObserver:(nonnull id)observer
@@ -212,7 +201,25 @@
     }
 }
 
-- (void)_postNotification:(nonnull Notification *)notification
+- (void)postNotificationName:(nonnull NSString *)name object:(nullable id)object userInfo:(NSDictionary *)userInfo argumentList:(nullable NSArray *)argumentList
+{
+    Notification *notification = [[Notification alloc] initWithName:name object:object userInfo:userInfo];
+    [self postNotification:notification argumentList:argumentList];
+}
+
+- (void)postNotification:(Notification *)notification argumentList:(nullable NSArray *)argumentList
+{
+    if ([NSThread isMainThread]) {
+        [self _postNotification:notification argumentList:argumentList];
+    }
+    else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self _postNotification:notification argumentList:argumentList];
+        });
+    }
+}
+
+- (void)_postNotification:(Notification *)notification argumentList:(nullable NSArray *)argumentList
 {
     NSMutableArray *notificationObserverRecords = [self.notificationObserverRecordMap objectForKey:[notification name]];
     
@@ -222,43 +229,38 @@
             continue;
         }
         
-        if (notificationObserverRecord.block) {
-            notificationObserverRecord.block(notification);
-        } else if (notificationObserverRecord.selector && [notificationObserverRecord.observer respondsToSelector:notificationObserverRecord.selector]) {
-            NSInvocation* invocation = [NSInvocation invocationWithMethodSignature:[notificationObserverRecord.observer  methodSignatureForSelector:notificationObserverRecord.selector]];
+        NSInvocation *invocation = nil;
+        NSInteger startIndex = 2;
+        if (notificationObserverRecord.blockDescription) {
+            invocation = [NSInvocation invocationWithMethodSignature:notificationObserverRecord.blockDescription.blockSignature];
+            [invocation setTarget:notificationObserverRecord.blockDescription.block];
+            startIndex = 1; //block argument 0的符号是”@?”代表block, argument 1不是selector而是第一个参数, 所以setArgument是从1开始, 而不是2.
+        } else if (notificationObserverRecord.observer  &&
+                   notificationObserverRecord.selector &&
+                   [notificationObserverRecord.observer respondsToSelector:notificationObserverRecord.selector]) {
+            invocation = [NSInvocation invocationWithMethodSignature:[notificationObserverRecord.observer  methodSignatureForSelector:notificationObserverRecord.selector]];
             [invocation setSelector:notificationObserverRecord.selector];
             [invocation setTarget:notificationObserverRecord.observer];
-            
-            id argument = notification.userInfo;
-            [invocation setArgument:&argument atIndex:2];
-            [invocation invoke];
-        }
-    }
-}
-
-- (void)_postNotificationName:(nonnull NSString *)name object:(nullable id)object argumentList:(NSArray *)argumentList
-{
-    NSMutableArray *notificationObserverRecords = [self.notificationObserverRecordMap objectForKey:name];
-    
-    for (NotificationObserverRecord *notificationObserverRecord in notificationObserverRecords) {
-        if ([notificationObserverRecord object] != nil && object != [notificationObserverRecord object]) {
-            continue;
+            startIndex = 2; //SEL argument 0代表self, argument 1是_cmd,
         }
         
-        if (![notificationObserverRecord.observer respondsToSelector:notificationObserverRecord.selector]) {
-            continue;
+        //不管block还是SEL第一个参数是notification
+        [invocation setArgument:&notification atIndex:startIndex];
+        
+        startIndex++;
+        
+        if (invocation.methodSignature.numberOfArguments - startIndex !=  [argumentList count]) {
+            NSAssert(NO, @"参数不匹配");
         }
         
-        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature:[notificationObserverRecord.observer  methodSignatureForSelector:notificationObserverRecord.selector]];
-        [invocation setSelector:notificationObserverRecord.selector];
-        [invocation setTarget:notificationObserverRecord.observer];
-        
-        if (argumentList) {
-            [self bindArgumentList:argumentList forInvocation:invocation];
+        for (NSInteger index = startIndex; index < invocation.methodSignature.numberOfArguments; index++) {
+            id argument = argumentList[index-startIndex];
+            [invocation setArgument:&argument atIndex:index];
         }
         
         [invocation invoke];
     }
+
 }
 
 - (void)_removeObserver:(nonnull id)observer
@@ -277,8 +279,8 @@
                 continue;
             }
             
-            if (currentNotificationObserverRecord.block) {
-                currentNotificationObserverRecord.block = nil;
+            if (currentNotificationObserverRecord.blockDescription) {
+                currentNotificationObserverRecord.blockDescription = nil;
             }
             [notificationObserverRecords removeObjectAtIndex:index];
         }
@@ -307,22 +309,14 @@
             continue;
         }
         
-        if (currentNotificationObserverRecord.block) {
-            currentNotificationObserverRecord.block = nil;
+        if (currentNotificationObserverRecord.blockDescription) {
+            currentNotificationObserverRecord.blockDescription = nil;
         }
         [notificationObserverRecords removeObjectAtIndex:index];
     }
     
     if ([notificationObserverRecords count] == 0) {
         [self.notificationObserverRecordMap removeObjectForKey:name];
-    }
-}
-
-- (void)bindArgumentList:(NSArray *)argumentList forInvocation:(NSInvocation*)invocation
-{
-    for (unsigned int index = 2; index < invocation.methodSignature.numberOfArguments; index++) {
-        id argument = argumentList[index-2];
-        [invocation setArgument:&argument atIndex:index];
     }
 }
 
