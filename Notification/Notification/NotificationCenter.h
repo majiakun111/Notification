@@ -22,7 +22,6 @@
 - (void)postNotificationName:(nonnull NSString *)name object:(nullable id)object;
 - (void)postNotificationName:(nonnull NSString *)name object:(nullable id)object userInfo:(nullable NSDictionary *)userInfo;
 
-//针对参数可变, 只会执行selector不会执行block, block不支持参数可变 只支持id类型的数据
 - (void)postNotificationName:(nonnull NSString *)name object:(nullable id)object firstArgument:(nullable id)firstArgument,...;
 - (void)postNotificationName:(nonnull NSString *)name object:(nullable id)object argumentList:(nullable NSArray *)argumentList;
 
